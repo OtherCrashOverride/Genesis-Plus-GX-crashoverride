@@ -25,10 +25,10 @@
 # -DMAXROMSIZE: defines maximal size of ROM/SRAM buffer (also shared with CD hardware) */
 # -DHAVE_YM3438_CORE: enable (configurable) support for Nuked cycle-accurate YM3438 core */
 
-NAME	  = gen_sdl2
+NAME	  = gen_odroid
 
 CC        = gcc
-CFLAGS    = `sdl2-config --cflags` -Wall -Wno-strict-aliasing -ansi -std=c99 -pedantic-errors
+CFLAGS    = -O3 -Wall -Wno-strict-aliasing -ansi -std=c99 -pedantic-errors
 #-g -ggdb -pg
 #-fomit-frame-pointer
 #LDFLAGS   = -pg
