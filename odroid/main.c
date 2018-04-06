@@ -35,6 +35,8 @@ extern int usleep (__useconds_t __useconds);
 
 #define SOUND_FREQUENCY 44100
 #define SOUND_SAMPLES_SIZE  2048
+#define SOUND_CHANNEL_COUNT 2
+
 
 #define VIDEO_WIDTH  1024
 #define VIDEO_HEIGHT 768
@@ -76,7 +78,7 @@ static uint8 brm_format[0x40] =
 };
 
 
-static short soundframe[SOUND_SAMPLES_SIZE];
+static short soundframe[SOUND_SAMPLES_SIZE] __attribute__((aligned(16)));
 
 // static void sdl_sound_callback(void *userdata, Uint8 *stream, int len)
 // {
@@ -1036,6 +1038,7 @@ ALuint source;
 #define ADJUSTED_SOUND_FREQUENCY (SOUND_FREQUENCY)
 void InitSound()
 {
+    printf("Sound: SOUND_FREQUENCY=%d\n", SOUND_FREQUENCY);
 
 	device = alcOpenDevice(NULL);
 	if (!device)
@@ -1061,7 +1064,7 @@ void InitSound()
 
 	//memset(audioBuffer, 0, AUDIOBUFFER_LENGTH * sizeof(short));
 
-	const int BUFFER_COUNT = 8;
+	const int BUFFER_COUNT = 4;
 	for (int i = 0; i < BUFFER_COUNT; ++i)
 	{
 		ALuint buffer;
@@ -1075,29 +1078,31 @@ void InitSound()
 
 void ProcessAudio()
 {
-    int samples = audio_update(soundframe);
-    if (samples * 2 > SOUND_SAMPLES_SIZE)
+    int frames = audio_update(soundframe);
+    if (frames * SOUND_CHANNEL_COUNT > SOUND_SAMPLES_SIZE)
     {
-        printf("ProcessAudio: sound buffer overflow (%d samples).\n", samples);
+        printf("Sound: soundframe overflow - samples=%d, SOUND_SAMPLES_SIZE=%d\n",
+            frames * SOUND_CHANNEL_COUNT, SOUND_SAMPLES_SIZE);
+        exit(1);
     }
 
     if (!alcMakeContextCurrent(context))
     {
-    	printf("OpenAL: alcMakeContextCurrent failed.\n");
-    	exit(1);
+        printf("OpenAL: alcMakeContextCurrent failed.\n");
+        exit(1);
     }
 
     ALint processed = 0;
     while(!processed)
     {
-    	alGetSourceiv(source, AL_BUFFERS_PROCESSED, &processed);
+        alGetSourceiv(source, AL_BUFFERS_PROCESSED, &processed);
 
-    	if (!processed)
-    	{
-    		usleep(0);
+        if (!processed)
+        {
+            usleep(0);
             //printf("Audio overflow.\n");
             //return;
-    	}
+        }
     }
 
     ALuint openALBufferID;
@@ -1105,7 +1110,7 @@ void ProcessAudio()
 
     ALuint format = AL_FORMAT_STEREO16;
 
-    int dataByteLength = samples * 2 * sizeof(short);
+    int dataByteLength = frames * sizeof(short) * SOUND_CHANNEL_COUNT;
     alBufferData(openALBufferID, format, soundframe, dataByteLength, ADJUSTED_SOUND_FREQUENCY);
 
     alSourceQueueBuffers(source, 1, &openALBufferID);
@@ -1115,9 +1120,8 @@ void ProcessAudio()
 
     if (result != AL_PLAYING)
     {
-    	alSourcePlay(source);
+        alSourcePlay(source);
     }
-
 }
 
 
