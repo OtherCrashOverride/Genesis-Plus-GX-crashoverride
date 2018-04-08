@@ -2,13 +2,17 @@ This is a port of "Genesis Plus GX" to the ODROID platform(s).  The original is 
 https://github.com/ekeeke/Genesis-Plus-GX
 
 Dependencies:
-  sudo apt install libevdev-dev libopenal-dev
-
+```
+    sudo apt install libevdev-dev libopenal-dev
+```
 Compile:
-  git clone https://github.com/OtherCrashOverride/Genesis-Plus-GX-crashoverride.git
-  cd Genesis-Plus-GX-crashoverride/odroid/
-  make
-
+```
+    git clone https://github.com/OtherCrashOverride/Genesis-Plus-GX-crashoverride.git
+    cd Genesis-Plus-GX-crashoverride/odroid/
+    make
+```
 Run:
-  ./gen_odroid PathToYourRomFile
+```
+    ./gen_odroid PathToYourRomFile
+```
 
