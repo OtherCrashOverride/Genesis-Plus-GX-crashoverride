@@ -173,6 +173,7 @@ sms_ntsc_t *sms_ntsc;
 int drm_fd;
 X11Window* x11Window;
 Blit* blit;
+int totalFrames;
 
 static int sdl_video_init()
 {
@@ -371,6 +372,7 @@ static void sdl_video_update()
 
 
   //++sdl_video.frames_rendered;
+  ++totalFrames;
 }
 
 // static void sdl_video_close()
@@ -1133,6 +1135,8 @@ static void sighandler(int signum)
     running = 0;
 }
 
+double totalElapsed;
+
 int main (int argc, char **argv)
 {
   FILE *fp;
@@ -1331,6 +1335,9 @@ int main (int argc, char **argv)
 #endif
 
   /* emulation loop */
+  Stopwatch_Reset();
+  Stopwatch_Start();
+
   while(running)
   {
 #if 0
@@ -1404,6 +1411,20 @@ int main (int argc, char **argv)
 	// 	//throw Exception("drmWaitVBlank failed.");
 	// }
 #endif
+
+    // Measure FPS
+    totalElapsed += Stopwatch_Elapsed();
+
+    if (totalElapsed >= 1.0)
+    {
+        int fps = (int)(totalFrames / totalElapsed);
+        fprintf(stderr, "FPS: %i\n", fps);
+
+        totalFrames = 0;
+        totalElapsed = 0;
+    }
+
+    Stopwatch_Reset();
   }
 
   if (system_hw == SYSTEM_MCD)

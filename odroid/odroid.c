@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/time.h>
 
 
 const int DEFAULT_WIDTH = 1280;
@@ -70,6 +71,47 @@ void main()\n \
 }\n \
 \n \
 ";
+
+struct timeval startTime;
+struct timeval endTime;
+double elapsed = 0;
+int isRunning = 0;
+
+void Stopwatch_Start()
+{
+	gettimeofday(&startTime, NULL);
+	isRunning = 1;
+}
+
+void Stopwatch_Stop()
+{
+	gettimeofday(&endTime, NULL);
+
+	isRunning = 0;
+	elapsed = Stopwatch_Elapsed();
+}
+
+void Stopwatch_Reset()
+{
+	elapsed = 0;
+
+	gettimeofday(&startTime, NULL);
+	endTime = startTime;
+}
+
+double Stopwatch_Elapsed()
+{
+	if (isRunning)
+	{
+		gettimeofday(&endTime, NULL);
+	}
+
+	double seconds = (endTime.tv_sec - startTime.tv_sec);
+	double milliseconds = ((double)(endTime.tv_usec - startTime.tv_usec)) / 1000000.0;
+
+	return elapsed + seconds + milliseconds;
+}
+
 
 
 void Egl_CheckError()

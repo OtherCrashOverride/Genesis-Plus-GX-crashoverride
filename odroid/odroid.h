@@ -58,6 +58,13 @@ typedef struct
 	float M44;   //15
 } Matrix4;
 
+
+void Stopwatch_Start();
+void Stopwatch_Stop();
+void Stopwatch_Reset();
+double Stopwatch_Elapsed();
+
+
 X11Window* X11Window_Create();
 void X11Window_Destroy(X11Window* x11Window);
 void X11Window_WaitForMessage(X11Window* x11Window);
